@@ -31,8 +31,8 @@ public class AverageWindowedSensorBolt extends BaseWindowedBolt {
             final Integer locationCode = input.getIntegerByField("locationCode");
             final Float value = input.getFloatByField("value");
 
-            int currentCount = 1;
-            double currentSum = value;
+            int currentCount;
+            double currentSum;
 
             if (!count.containsKey(locationCode)) {
                 count.put(locationCode, 1);

@@ -17,7 +17,10 @@ public class Task5 {
 
         builder.setSpout("sensor-gen", new SensorGeneratorSpout());
         builder.setBolt("filter", new FilterBolt("temp")).shuffleGrouping("sensor-gen");
-        builder.setBolt("printing", new PrintingBolt("SENSOR> ")).shuffleGrouping("filter");
+        builder.setBolt("average",
+                new AverageWindowedSensorBolt().withTumblingWindow(new BaseWindowedBolt.Duration(10, TimeUnit.SECONDS)))
+                .fieldsGrouping("filter", new Fields("locationCode"));
+        builder.setBolt("printing", new PrintingBolt("WINDOWED AVERAGE> ")).shuffleGrouping("average");
 
 
         LocalCluster cluster = new LocalCluster();

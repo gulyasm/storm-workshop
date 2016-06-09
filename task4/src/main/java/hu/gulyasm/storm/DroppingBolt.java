@@ -1,23 +1,25 @@
 package hu.gulyasm.storm;
 
-import org.apache.storm.state.State;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
-import org.apache.storm.topology.*;
+import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
 
 import java.util.Map;
+import java.util.UUID;
 
-public class FilterBolt extends BaseRichBolt {
+public class DroppingBolt extends BaseRichBolt {
 
-    private String type;
+    private int counter;
+    private int dropRate;
     private OutputCollector collector;
 
-    public FilterBolt(String type) {
-        this.type = type;
+    public DroppingBolt(int dropRate) {
+        this.counter = 0;
+        this.dropRate = dropRate;
     }
 
     @Override
@@ -27,13 +29,14 @@ public class FilterBolt extends BaseRichBolt {
 
     @Override
     public void execute(Tuple input) {
-        if(input.getStringByField("type").equals(this.type)) {
+        if (++counter == this.dropRate) {
+            counter = 0;
+        } else {
             Values values = new Values();
             values.addAll(input.getValues());
             collector.emit(input, values);
+            collector.ack(input);
         }
-        collector.ack(input);
-
     }
 
     @Override

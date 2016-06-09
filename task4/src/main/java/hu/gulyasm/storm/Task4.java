@@ -9,7 +9,7 @@ import org.apache.storm.utils.Utils;
 
 import java.util.concurrent.TimeUnit;
 
-public class Task5 {
+public class Task4 {
 
     public static void main(String[] args) {
 
@@ -17,14 +17,13 @@ public class Task5 {
 
         builder.setSpout("sensor-gen", new SensorGeneratorSpout());
         builder.setBolt("filter", new FilterBolt("temp")).shuffleGrouping("sensor-gen");
-        builder.setBolt("average",
-                new AverageWindowedSensorBolt().withTumblingWindow(new BaseWindowedBolt.Duration(10, TimeUnit.SECONDS)))
-                .fieldsGrouping("filter", new Fields("locationCode"));
-        builder.setBolt("printing", new PrintingBolt("WINDOWED AVERAGE> ")).shuffleGrouping("average");
+        builder.setBolt("dropping", new DroppingBolt(10)).shuffleGrouping("filter");
+        builder.setBolt("printing", new PrintingBolt("FINISHED> ")).shuffleGrouping("dropping");
 
 
         LocalCluster cluster = new LocalCluster();
         Config conf = new Config();
+        conf.setMessageTimeoutSecs(5);
         cluster.submitTopology("mytopology", conf, builder.createTopology());
 
         Utils.sleep(2 * 60 * 1000);

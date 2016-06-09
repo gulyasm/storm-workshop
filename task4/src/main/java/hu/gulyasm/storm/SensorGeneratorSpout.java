@@ -23,10 +23,18 @@ public class SensorGeneratorSpout extends BaseRichSpout {
     public void nextTuple() {
         Utils.sleep(50);
         SensorData data = generator.generate();
-        collector.emit(new Values(data.ID, data.sensorID, data.timestamp, data.locationCode, data.type, data.value));
+        collector.emit(new Values(data.ID, data.sensorID, data.timestamp, data.locationCode, data.type, data.value), data.ID);
     }
 
+    @Override
+    public void fail(Object msgId) {
+        System.out.println(msgId + " FAILED!");
+    }
 
+    @Override
+    public void ack(Object msgId) {
+        // System.out.println(msgId + " SUCCESSFULLY FINISHED!");
+    }
 
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
         declarer.declare(new Fields("ID", "sensorID", "timestamp", "locationCode", "type", "value"));

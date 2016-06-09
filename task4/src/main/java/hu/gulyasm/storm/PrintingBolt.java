@@ -28,6 +28,7 @@ public class PrintingBolt extends BaseRichBolt {
     @Override
     public void execute(Tuple input) {
         System.out.println(this.prefix + input);
+        collector.ack(input);
     }
 
     @Override
